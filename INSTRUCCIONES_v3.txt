@@ -1,0 +1,39 @@
+VERTEX AI HUB v3.0 — INSTRUCCIONES DE DESPLIEGUE
+================================================
+
+CAMBIOS PRINCIPALES EN v3:
+- Nueva sección "Creativos con IA" con flujo de 4 pasos
+- Subida de fotos de referencia (drag & drop)
+- Generación de 3-4 prompts optimizados para Seedream 4.5 / Flux
+- Soporte de ratios: 1:1, 4:5, 9:16, 16:9
+- Overlay editor: headline, subtítulo y CTA visual
+- Generación de caption + hashtags con IA (Haiku)
+- Plan de ads completo integrado al creativo
+- Nueva sección Roadmap web (arquitectura técnica)
+- Diseño actualizado con tipografía Cormorant Garamond + DM Sans
+- VERTEX OS como identidad del sistema
+
+DESPLIEGUE EN VERCEL:
+1. Sube los archivos: index.html, api/chat.js, vercel.json
+2. Variables de entorno en Vercel Dashboard:
+   - ANTHROPIC_API_KEY = tu clave de Anthropic
+   - PASSWORD_KEVIN = contraseña para Kevin
+   - PASSWORD_WILLIAM = contraseña para William
+3. Deploy → listo
+
+FLUJO CREATIVOS CON IA:
+1. Sube 1-4 fotos de referencia (o déjalas vacías)
+2. Selecciona tipo de creativo + producto + objetivo
+3. Genera prompts → cópialos en Seedream / Flux / Midjourney
+4. Genera las imágenes externamente
+5. Sube las imágenes resultantes al Hub
+6. Elige tu favorita
+7. Agrega headline, subtítulo y CTA (preview en vivo)
+8. Genera caption + hashtags automáticamente
+9. Genera el plan de ads completo para ese creativo
+
+NOTA SOBRE COSTOS (mes 1):
+- Claude Haiku: ~$0.00025 / 1K input tokens (muy barato)
+- Todos los generadores usan Haiku
+- Total estimado con uso normal: $10-15/mes
+
