@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vertex Academy — AI Marketing Hub</title>
+<style>
+  /* ── RESET & BASE ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --gold: #c9a227;
+    --gold-light: #e8c96a;
+    --dark: #1a1004;
+    --dark2: #2a1c06;
+    --bg: #0f0a02;
+    --surface: #1c1408;
+    --surface2: #241c0a;
+    --border: rgba(201,162,39,0.15);
+    --border2: rgba(201,162,39,0.3);
+    --text: #f0e8d0;
+    --text2: #a09070;
+    --text3: #6a5a3a;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── LOGIN SCREEN ── */
+  #login-screen {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg);
+    background-image: radial-gradient(ellipse at 50% 0%, rgba(201,162,39,0.08) 0%, transparent 70%);
+  }
+  .login-box {
+    width: 360px; padding: 40px 36px;
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: 16px;
+    text-align: center;
+  }
+  .login-logo {
+    width: 56px; height: 56px; background: var(--dark);
+    border: 1px solid var(--border2); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: var(--gold);
+    letter-spacing: 1px; margin: 0 auto 20px;
+  }
+  .login-box h1 { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .login-box p { font-size: 13px; color: var(--text2); margin-bottom: 28px; }
+  .login-box input {
+    width: 100%; padding: 11px 14px; border-radius: var(--radius-sm);
+    background: var(--surface2); border: 0.5px solid var(--border2);
+    color: var(--text); font-size: 14px; text-align: center;
+    letter-spacing: 3px; outline: none; margin-bottom: 14px;
+    transition: border-color 0.2s;
+  }
+  .login-box input:focus { border-color: var(--gold); }
+  .login-box input::placeholder { letter-spacing: 0; color: var(--text3); }
+  .btn-login {
+    width: 100%; padding: 11px; background: var(--gold);
+    color: var(--dark); border: none; border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn-login:hover { opacity: 0.9; }
+  .login-error { font-size: 12px; color: #e05; margin-top: 10px; display: none; }
+
+  /* ── APP LAYOUT ── */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+  #app.visible { display: flex; }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px;
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .header-logo { display: flex; align-items: center; gap: 10px; }
+  .header-logo .icon {
+    width: 34px; height: 34px; background: var(--dark);
+    border: 1px solid var(--border2); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 1px;
+  }
+  .header-logo h1 { font-size: 15px; font-weight: 600; color: var(--text); }
+  .header-logo span { font-size: 11px; color: var(--text2); }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .user-badge {
+    font-size: 11px; padding: 4px 10px; border-radius: 99px;
+    background: var(--surface2); color: var(--gold);
+    border: 0.5px solid var(--border2);
+  }
+  .logout-btn {
+    font-size: 11px; padding: 4px 10px; border-radius: 99px;
+    background: transparent; color: var(--text2);
+    border: 0.5px solid var(--border); cursor: pointer;
+    transition: all 0.15s;
+  }
+  .logout-btn:hover { border-color: var(--border2); color: var(--text); }
+
+  /* ── MAIN LAYOUT ── */
+  .main { display: flex; flex: 1; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 200px; flex-shrink: 0;
+    background: var(--surface);
+    border-right: 0.5px solid var(--border);
+    padding: 20px 12px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .sidebar-label {
+    font-size: 10px; color: var(--text3); letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 0 8px; margin-bottom: 4px; margin-top: 12px;
+  }
+  .sidebar-label:first-child { margin-top: 0; }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 10px; border-radius: var(--radius-sm);
+    font-size: 13px; color: var(--text2); cursor: pointer;
+    transition: all 0.15s; border: 0.5px solid transparent;
+    background: transparent;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active {
+    background: var(--dark); color: var(--gold);
+    border-color: var(--border2);
+  }
+  .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+
+  /* ── CONTENT ── */
+  .content { flex: 1; padding: 24px; overflow-y: auto; max-width: 800px; }
+
+  /* ── PANEL ── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .panel-title { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .panel-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 14px;
+  }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .card-sub { font-size: 12px; color: var(--text2); margin-bottom: 14px; }
+
+  /* ── FORM ELEMENTS ── */
+  label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 5px; margin-top: 12px; }
+  label:first-child { margin-top: 0; }
+  select, textarea, input[type=text], input[type=password] {
+    width: 100%; padding: 9px 12px;
+    background: var(--surface2); border: 0.5px solid var(--border2);
+    color: var(--text); border-radius: var(--radius-sm);
+    font-size: 13px; font-family: inherit; outline: none;
+    resize: vertical; transition: border-color 0.2s;
+  }
+  select:focus, textarea:focus, input[type=text]:focus { border-color: var(--gold); }
+  select option { background: var(--surface2); }
+
+  /* ── TAGS ── */
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .tag {
+    font-size: 11px; padding: 4px 10px; border-radius: 99px;
+    background: var(--surface2); color: var(--text2);
+    border: 0.5px solid var(--border); cursor: pointer; transition: all 0.15s;
+  }
+  .tag:hover { border-color: var(--border2); color: var(--text); }
+  .tag.active { background: var(--dark); color: var(--gold); border-color: var(--border2); }
+
+  /* ── GRID ── */
+  .g2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    padding: 9px 18px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all 0.15s; border: none;
+  }
+  .btn-primary { background: var(--gold); color: var(--dark); }
+  .btn-primary:hover { background: var(--gold-light); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-ghost {
+    background: transparent; color: var(--text2);
+    border: 0.5px solid var(--border2);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--gold); }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+
+  /* ── RESULT ── */
+  .result {
+    display: none; margin-top: 14px;
+    background: var(--surface2); border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm); padding: 16px;
+    font-size: 13px; line-height: 1.75; color: var(--text);
+    white-space: pre-wrap; max-height: 420px; overflow-y: auto;
+  }
+  .result.visible { display: block; }
+  .result.loading { color: var(--text2); font-style: italic; }
+
+  /* ── CHAT ── */
+  .chat-area {
+    max-height: 380px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 4px 0; margin-bottom: 14px;
+  }
+  .msg {
+    padding: 10px 14px; border-radius: var(--radius-sm);
+    font-size: 13px; line-height: 1.65; max-width: 88%;
+  }
+  .msg.user {
+    background: var(--dark); color: var(--gold);
+    border: 0.5px solid var(--border2); align-self: flex-end;
+  }
+  .msg.ai {
+    background: var(--surface2); color: var(--text);
+    border: 0.5px solid var(--border); align-self: flex-start;
+  }
+  .chat-row { display: flex; gap: 8px; }
+  .chat-row input { flex: 1; }
+
+  /* ── METRICS ── */
+  .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .metric-card {
+    background: var(--surface2); border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px; text-align: center;
+  }
+  .metric-num { font-size: 24px; font-weight: 600; color: var(--gold); }
+  .metric-label { font-size: 11px; color: var(--text2); margin-top: 3px; }
+  .metric-goal { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+  .progress-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+  .progress-bar { height: 4px; background: var(--surface2); border-radius: 2px; margin-bottom: 12px; }
+  .progress-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.4s; }
+
+  /* ── QUICK PROMPTS ── */
+  .quick-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+
+  /* ── SEPARATOR ── */
+  .sep { height: 0.5px; background: var(--border); margin: 16px 0; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  @media (max-width: 600px) {
+    .sidebar { width: 52px; }
+    .sidebar .nav-item span { display: none; }
+    .sidebar-label { display: none; }
+    .content { padding: 16px; }
+    .metric-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">VA</div>
+    <h1>Vertex AI Hub</h1>
+    <p>Acceso exclusivo para el equipo fundador</p>
+    <input type="password" id="pwd-input" placeholder="Ingresa tu contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-login" onclick="doLogin()">Ingresar</button>
+    <div class="login-error" id="login-error">Contraseña incorrecta. Intenta de nuevo.</div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-logo">
+      <div class="icon">VA</div>
+      <div>
+        <h1>Vertex AI Marketing Hub</h1>
+        <span>IA entrenada con tu plan de negocio completo</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="user-badge" id="user-badge">Kevin</div>
+      <button class="logout-btn" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-label">Contenido</div>
+      <div class="nav-item active" onclick="showPanel('contenido', this)">
+        <span class="nav-icon">✦</span><span>Generar posts</span>
+      </div>
+      <div class="nav-item" onclick="showPanel('hooks', this)">
+        <span class="nav-icon">⚡</span><span>Hooks / ganchos</span>
+      </div>
+      <div class="sidebar-label">Ventas</div>
+      <div class="nav-item" onclick="showPanel('plan', this)">
+        <span class="nav-icon">◈</span><span>Plan de ventas</span>
+      </div>
+      <div class="nav-item" onclick="showPanel('whatsapp', this)">
+        <span class="nav-icon">◉</span><span>Scripts WhatsApp</span>
+      </div>
+      <div class="sidebar-label">Estrategia</div>
+      <div class="nav-item" onclick="showPanel('calendario', this)">
+        <span class="nav-icon">◷</span><span>Calendario IG</span>
+      </div>
+      <div class="nav-item" onclick="showPanel('chat', this)">
+        <span class="nav-icon">◎</span><span>Chat con IA</span>
+      </div>
+      <div class="sidebar-label">Métricas</div>
+      <div class="nav-item" onclick="showPanel('dashboard', this)">
+        <span class="nav-icon">◫</span><span>Dashboard</span>
+      </div>
+      <div class="sidebar-label">Ads</div>
+      <div class="nav-item" onclick="showPanel('calculadora', this)">
+        <span class="nav-icon">⊞</span><span>Calculadora</span>
+      </div>
+      <div class="nav-item" onclick="showPanel('segmentacion', this)">
+        <span class="nav-icon">◈</span><span>Segmentación</span>
+      </div>
+      <div class="nav-item" onclick="showPanel('audiencias', this)">
+        <span class="nav-icon">◉</span><span>Audiencias</span>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- ── CONTENIDO ── -->
+      <div id="panel-contenido" class="panel active">
+        <div class="panel-title">Generador de contenido</div>
+        <div class="panel-sub">Crea posts, reels y carruseles listos para publicar en Instagram y TikTok.</div>
+
+        <div class="card">
+          <div class="card-title">Tipo de contenido</div>
+          <div class="tags" id="t-tipo">
+            <span class="tag active" onclick="pickTag(this,'t-tipo')">Carrusel educativo</span>
+            <span class="tag" onclick="pickTag(this,'t-tipo')">Mito vs evidencia</span>
+            <span class="tag" onclick="pickTag(this,'t-tipo')">Guión de Reel</span>
+            <span class="tag" onclick="pickTag(this,'t-tipo')">Post de venta</span>
+            <span class="tag" onclick="pickTag(this,'t-tipo')">Historia personal</span>
+            <span class="tag" onclick="pickTag(this,'t-tipo')">Masterclass gancho</span>
+            <span class="tag" onclick="pickTag(this,'t-tipo')">Testimonio</span>
+          </div>
+
+          <div class="card-title" style="margin-top:16px">Tema</div>
+          <div class="tags" id="t-tema">
+            <span class="tag active" onclick="pickTag(this,'t-tema')">Bioquímica Clínica</span>
+            <span class="tag" onclick="pickTag(this,'t-tema')">Nutrición Halterofilia</span>
+            <span class="tag" onclick="pickTag(this,'t-tema')">IA en Nutrición</span>
+            <span class="tag" onclick="pickTag(this,'t-tema')">Suplementación ISSN</span>
+            <span class="tag" onclick="pickTag(this,'t-tema')">Composición Corporal</span>
+            <span class="tag" onclick="pickTag(this,'t-tema')">Exámenes de laboratorio</span>
+            <span class="tag" onclick="pickTag(this,'t-tema')">CrossFit & Nutrición</span>
+            <span class="tag" onclick="pickTag(this,'t-tema')">Errores del nutricionista</span>
+          </div>
+
+          <div class="card-title" style="margin-top:16px">Nicho</div>
+          <div class="tags" id="t-nicho">
+            <span class="tag active" onclick="pickTag(this,'t-nicho')">Vertex Clinical</span>
+            <span class="tag" onclick="pickTag(this,'t-nicho')">Vertex Performance</span>
+            <span class="tag" onclick="pickTag(this,'t-nicho')">Ambos</span>
+          </div>
+
+          <label style="margin-top:16px">Contexto adicional (opcional)</label>
+          <textarea id="extra-contenido" rows="2" placeholder="Ej: lanzamiento el sábado, precio $15, quedan 5 cupos..."></textarea>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="generar('contenido')">Generar contenido completo</button>
+            <button class="btn btn-ghost" onclick="generar('bio')">Optimizar bio IG</button>
+          </div>
+          <div id="r-contenido" class="result"></div>
+          <button class="btn btn-ghost" id="cp-contenido" style="display:none;margin-top:8px" onclick="copiar('r-contenido','cp-contenido')">Copiar</button>
+        </div>
+      </div>
+
+      <!-- ── HOOKS ── -->
+      <div id="panel-hooks" class="panel">
+        <div class="panel-title">Generador de hooks</div>
+        <div class="panel-sub">Los primeros 3 segundos que definen si tu reel explota o muere.</div>
+        <div class="card">
+          <div class="g2">
+            <div>
+              <label>Plataforma</label>
+              <select id="h-plat">
+                <option>Instagram Reels</option>
+                <option>TikTok</option>
+                <option>Carrusel (primera slide)</option>
+              </select>
+            </div>
+            <div>
+              <label>Tema</label>
+              <select id="h-tema">
+                <option>Bioquímica clínica</option>
+                <option>Nutrición deportiva</option>
+                <option>IA en nutrición</option>
+                <option>Suplementación con evidencia</option>
+                <option>Errores del nutricionista</option>
+                <option>Interpretación de laboratorios</option>
+                <option>Nutrición en halterofilia</option>
+              </select>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="generar('hooks')">Generar 10 hooks</button>
+          </div>
+          <div id="r-hooks" class="result"></div>
+          <button class="btn btn-ghost" id="cp-hooks" style="display:none;margin-top:8px" onclick="copiar('r-hooks','cp-hooks')">Copiar</button>
+        </div>
+      </div>
+
+      <!-- ── PLAN DE VENTAS ── -->
+      <div id="panel-plan" class="panel">
+        <div class="panel-title">Plan de ventas</div>
+        <div class="panel-sub">Un plan semana a semana con acciones concretas para conseguir inscriptos.</div>
+        <div class="card">
+          <div class="g2">
+            <div>
+              <label>Etapa actual</label>
+              <select id="p-etapa">
+                <option>Semana 0 — Pre-lanzamiento</option>
+                <option>Semana 1–2 — Infraestructura lista</option>
+                <option>Semana 3 — Preventa activa</option>
+                <option>Mes 1 — Primer curso lanzado</option>
+                <option>Mes 2–3 — Crecimiento</option>
+                <option>Mes 4–6 — Escalando</option>
+              </select>
+            </div>
+            <div>
+              <label>Meta de ingresos (30 días)</label>
+              <select id="p-meta">
+                <option>$200–400 — meta conservadora</option>
+                <option>$400–700 — meta media</option>
+                <option>$700–1,000 — meta agresiva</option>
+                <option>$1,000+ — modo escala</option>
+              </select>
+            </div>
+          </div>
+          <div class="g2">
+            <div>
+              <label>Curso principal a vender</label>
+              <select id="p-curso">
+                <option>Bioquímica Clínica Aplicada ($20)</option>
+                <option>Nutrición en Halterofilia ($50–60)</option>
+                <option>IA en Nutrición ($20)</option>
+                <option>Suplementación ISSN ($25)</option>
+                <option>Composición Corporal ISAK ($55–65)</option>
+                <option>Múltiples cursos</option>
+              </select>
+            </div>
+            <div>
+              <label>Presupuesto publicidad</label>
+              <select id="p-pub">
+                <option>$0 — solo orgánico</option>
+                <option>$10–30 — boosting básico</option>
+                <option>$30–70 — Meta Ads activo</option>
+                <option>$70–150 — campaña completa</option>
+              </select>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="generar('plan')">Generar plan de ventas</button>
+          </div>
+          <div id="r-plan" class="result"></div>
+          <button class="btn btn-ghost" id="cp-plan" style="display:none;margin-top:8px" onclick="copiar('r-plan','cp-plan')">Copiar</button>
+        </div>
+      </div>
+
+      <!-- ── WHATSAPP ── -->
+      <div id="panel-whatsapp" class="panel">
+        <div class="panel-title">Scripts de WhatsApp</div>
+        <div class="panel-sub">Respuestas y flujos de conversación para cerrar ventas por WhatsApp.</div>
+        <div class="card">
+          <label>Situación del lead</label>
+          <select id="w-sit">
+            <option>Pregunta el precio del curso</option>
+            <option>Ya vio la masterclass pero no compró</option>
+            <option>Dice que es caro</option>
+            <option>Pide más información del certificado</option>
+            <option>Dice que no tiene tiempo ahora</option>
+            <option>Está comparando con otro curso</option>
+            <option>Primer contacto — no sabe nada de Vertex</option>
+            <option>Quiere pagar pero tiene dudas de la plataforma</option>
+          </select>
+          <div class="g2" style="margin-top:12px">
+            <div>
+              <label>Curso en cuestión</label>
+              <select id="w-curso">
+                <option>Bioquímica Clínica Aplicada</option>
+                <option>Nutrición en Halterofilia</option>
+                <option>IA en Nutrición</option>
+                <option>Suplementación ISSN</option>
+                <option>Taller presencial FELP</option>
+              </select>
+            </div>
+            <div>
+              <label>Tono deseado</label>
+              <select id="w-tono">
+                <option>Cercano y sin presión</option>
+                <option>Urgencia — pocos cupos</option>
+                <option>Muy profesional y formal</option>
+                <option>Amigable universitario</option>
+              </select>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="generar('whatsapp')">Generar script</button>
+          </div>
+          <div id="r-whatsapp" class="result"></div>
+          <button class="btn btn-ghost" id="cp-whatsapp" style="display:none;margin-top:8px" onclick="copiar('r-whatsapp','cp-whatsapp')">Copiar</button>
+        </div>
+      </div>
+
+      <!-- ── CALENDARIO ── -->
+      <div id="panel-calendario" class="panel">
+        <div class="panel-title">Calendario de Instagram</div>
+        <div class="panel-sub">Tu plan editorial semana a semana, con formatos, temas y CTAs listos.</div>
+        <div class="card">
+          <div class="g2">
+            <div>
+              <label>Período</label>
+              <select id="c-periodo">
+                <option>Próxima semana (7 días)</option>
+                <option>Próximas 2 semanas</option>
+                <option>Mes completo</option>
+              </select>
+            </div>
+            <div>
+              <label>Frecuencia</label>
+              <select id="c-frec">
+                <option>Alta — 5–6 posts/semana</option>
+                <option>Media — 3–4 posts/semana</option>
+                <option>Mínima — 2 posts/semana</option>
+              </select>
+            </div>
+          </div>
+          <label>Objetivo del período</label>
+          <div class="tags" id="t-obj">
+            <span class="tag active" onclick="pickTag(this,'t-obj')">Ganar seguidores</span>
+            <span class="tag" onclick="pickTag(this,'t-obj')">Vender un curso</span>
+            <span class="tag" onclick="pickTag(this,'t-obj')">Lanzar masterclass</span>
+            <span class="tag" onclick="pickTag(this,'t-obj')">Autoridad científica</span>
+            <span class="tag" onclick="pickTag(this,'t-obj')">Generar leads WhatsApp</span>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="generar('calendario')">Generar calendario</button>
+          </div>
+          <div id="r-calendario" class="result"></div>
+          <button class="btn btn-ghost" id="cp-calendario" style="display:none;margin-top:8px" onclick="copiar('r-calendario','cp-calendario')">Copiar</button>
+        </div>
+      </div>
+
+      <!-- ── CHAT ── -->
+      <div id="panel-chat" class="panel">
+        <div class="panel-title">Chat con la IA</div>
+        <div class="panel-sub">Tu asistente conoce Vertex Academy al 100%. Pregunta lo que quieras.</div>
+        <div class="card">
+          <div class="chat-area" id="chat-area">
+            <div class="msg ai">Hola. Soy tu IA de marketing de Vertex Academy. Conozco tu plan de negocio completo: cursos, precios, avales FELP y FEUCSG, estrategia de redes y proyección financiera. ¿Qué necesitas hoy?</div>
+          </div>
+          <div class="chat-row">
+            <input type="text" id="chat-input" placeholder="Pregunta lo que quieras..." onkeydown="if(event.key==='Enter')enviar()">
+            <button class="btn btn-primary" onclick="enviar()">Enviar</button>
+          </div>
+          <div class="quick-list">
+            <span class="tag" onclick="pregunta('¿Cuánto debo cobrar por mi primer curso y por qué?')">¿Cuánto cobrar?</span>
+            <span class="tag" onclick="pregunta('Dame una estrategia para conseguir 20 inscriptos esta semana sin publicidad pagada')">20 inscriptos sin ads</span>
+            <span class="tag" onclick="pregunta('Cómo presentar el aval FELP como argumento de venta al hablar con atletas')">Usar aval FELP</span>
+            <span class="tag" onclick="pregunta('¿Qué hago si llevo 2 semanas publicando y no tengo ningún inscripto?')">Sin ventas aún</span>
+            <span class="tag" onclick="pregunta('Genera un email de 150 palabras para seguimiento post-masterclass gratuita')">Email post-masterclass</span>
+            <span class="tag" onclick="pregunta('¿Cuándo es el momento correcto para activar Meta Ads y con cuánto empezar?')">¿Cuándo hacer ads?</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── DASHBOARD ── -->
+      <div id="panel-dashboard" class="panel">
+        <div class="panel-title">Dashboard de lanzamiento</div>
+        <div class="panel-sub">Registra tus métricas y la IA analiza dónde enfocar tu energía.</div>
+
+        <div class="card">
+          <div class="metric-grid">
+            <div class="metric-card">
+              <div class="metric-num" id="m-seg">0</div>
+              <div class="metric-label">Seguidores IG</div>
+              <div class="metric-goal">Meta mes 1: 200–400</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-num" id="m-ins">0</div>
+              <div class="metric-label">Inscriptos</div>
+              <div class="metric-goal">Meta mes 1: 15–20</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-num" id="m-ing">$0</div>
+              <div class="metric-label">Ingresos brutos</div>
+              <div class="metric-goal">Meta mes 1: $200–400</div>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="progress-row"><span>Seguidores</span><span id="pct-seg">0%</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="bar-seg" style="width:0%"></div></div>
+          <div class="progress-row"><span>Inscriptos</span><span id="pct-ins">0%</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="bar-ins" style="width:0%"></div></div>
+          <div class="progress-row"><span>Ingresos</span><span id="pct-ing">0%</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="bar-ing" style="width:0%"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Actualizar métricas</div>
+          <div class="g2">
+            <div>
+              <label>Seguidores en Instagram</label>
+              <input type="text" id="i-seg" placeholder="Ej: 87">
+            </div>
+            <div>
+              <label>Inscriptos confirmados</label>
+              <input type="text" id="i-ins" placeholder="Ej: 5">
+            </div>
+          </div>
+          <div class="g2">
+            <div>
+              <label>Ingresos brutos ($)</label>
+              <input type="text" id="i-ing" placeholder="Ej: 100">
+            </div>
+            <div>
+              <label>Semana actual</label>
+              <select id="i-sem">
+                <option>Semana 1</option><option>Semana 2</option><option>Semana 3</option>
+                <option>Semana 4</option><option>Mes 2</option><option>Mes 3</option>
+              </select>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="actualizarMetricas()">Actualizar</button>
+            <button class="btn btn-ghost" onclick="generar('metricas')">Analizar con IA</button>
+          </div>
+          <div id="r-metricas" class="result"></div>
+        </div>
+      </div>
+
+
+      <!-- ── CALCULADORA DE ADS ── -->
+      <div id="panel-calculadora" class="panel">
+        <div class="panel-title">Calculadora de inversión</div>
+        <div class="panel-sub">Descubre cuánto invertir en ads para alcanzar tus metas de inscriptos.</div>
+        <div class="card">
+          <div class="card-title">Parámetros de tu lanzamiento</div>
+          <div class="g2">
+            <div>
+              <label>Inscritos que quieres</label>
+              <input type="text" id="calc-inscritos" placeholder="Ej: 30" oninput="calcMetrics()">
+            </div>
+            <div>
+              <label>Ticket del curso (USD)</label>
+              <input type="text" id="calc-ticket" placeholder="Ej: 297" oninput="calcMetrics()">
+            </div>
+          </div>
+          <div class="g2">
+            <div>
+              <label>Días del lanzamiento</label>
+              <input type="text" id="calc-dias" placeholder="Ej: 21" oninput="calcMetrics()">
+            </div>
+            <div>
+              <label>Plataforma</label>
+              <select id="calc-plat" onchange="calcMetrics()">
+                <option>Meta Ads (Facebook + Instagram)</option>
+                <option>Google Ads</option>
+                <option>TikTok Ads</option>
+              </select>
+            </div>
+          </div>
+          <div id="calc-metrics-row" style="display:none; margin-top:16px;">
+            <div class="metric-grid">
+              <div class="metric-card">
+                <div class="metric-num" id="cm-inv">-</div>
+                <div class="metric-label">Inversión total est.</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-num" id="cm-dia">-</div>
+                <div class="metric-label">Presupuesto / día</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-num" id="cm-roas">-</div>
+                <div class="metric-label">ROAS objetivo</div>
+              </div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="genAds('calculadora')">Generar estrategia completa</button>
+          </div>
+          <div id="r-calculadora" class="result"></div>
+        </div>
+      </div>
+
+      <!-- ── ANÁLISIS DE SEGMENTACIÓN ── -->
+      <div id="panel-segmentacion" class="panel">
+        <div class="panel-title">Análisis de segmentación</div>
+        <div class="panel-sub">Pega tus métricas de Meta Ads y la IA te dice dónde está tu dinero y dónde lo estás perdiendo.</div>
+        <div class="card">
+          <div class="card-title">Datos de tu campaña actual</div>
+          <label>Métricas por segmento (copia de Ads Manager)</label>
+          <textarea id="seg-datos" rows="6" placeholder="Ejemplo:
+18-24 años: alcance 5,200 | clics 180 | leads 12 | costo $45
+25-34 años: alcance 8,900 | clics 420 | leads 38 | costo $89
+35-44 años: alcance 4,100 | clics 95 | leads 8 | costo $52
+Mujeres: CTR 3.8% | CPL $18
+Hombres: CTR 1.9% | CPL $34"></textarea>
+          <div class="g2" style="margin-top:12px">
+            <div>
+              <label>Objetivo de campaña</label>
+              <select id="seg-obj">
+                <option>Inscritos a un curso</option>
+                <option>Leads / prospectos</option>
+                <option>Ventas directas</option>
+                <option>Llamadas de ventas</option>
+              </select>
+            </div>
+            <div>
+              <label>Presupuesto restante (USD)</label>
+              <input type="text" id="seg-presup" placeholder="Ej: 500">
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="genAds('segmentacion')">Analizar segmentos</button>
+          </div>
+          <div id="r-segmentacion" class="result"></div>
+        </div>
+      </div>
+
+      <!-- ── GENERADOR DE AUDIENCIAS ── -->
+      <div id="panel-audiencias" class="panel">
+        <div class="panel-title">Generador de audiencias</div>
+        <div class="panel-sub">Describe a tu cliente ideal y la IA crea 5 audiencias listas para Meta Ads Manager.</div>
+        <div class="card">
+          <div class="card-title">Tu cliente ideal</div>
+          <label>¿A quién le vendes?</label>
+          <textarea id="aud-quien" rows="3" placeholder="Ej: emprendedores latinos de 25-40 años que quieren aprender marketing digital para vender más en redes, tienen un negocio pero no saben hacer ads"></textarea>
+          <div class="g2" style="margin-top:4px">
+            <div>
+              <label>País / región</label>
+              <select id="aud-pais">
+                <option>Ecuador</option>
+                <option>Colombia</option>
+                <option>México</option>
+                <option>Perú</option>
+                <option>Argentina</option>
+                <option>Latinoamérica</option>
+                <option>España</option>
+              </select>
+            </div>
+            <div>
+              <label>Tipo de audiencia</label>
+              <select id="aud-tipo">
+                <option>Frías (nuevos prospectos)</option>
+                <option>Retargeting</option>
+                <option>Lookalike</option>
+                <option>Mezcla de los tres</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label>Presupuesto de prueba (USD)</label>
+            <input type="text" id="aud-presup" placeholder="Ej: 200">
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="genAds('audiencias')">Generar 5 audiencias</button>
+          </div>
+          <div id="r-audiencias" class="result"></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ══ SISTEMA DE AUTENTICACIÓN ══
+// Las contraseñas reales se validan en el backend (api/chat.js).
+// Aquí solo guardamos la contraseña ingresada para enviarla con cada request.
+let SESSION_PWD = '';
+let SESSION_USER = '';
+
+function doLogin() {
+  const pwd = document.getElementById('pwd-input').value.trim();
+  if (!pwd) return;
+  SESSION_PWD = pwd;
+  // Determinamos el nombre de usuario localmente (solo visual)
+  // La validación real la hace el backend
+  SESSION_USER = pwd.toLowerCase().includes('kevin') ? 'Kevin' : 'William';
+  document.getElementById('user-badge').textContent = SESSION_USER;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+}
+
+function doLogout() {
+  SESSION_PWD = '';
+  SESSION_USER = '';
+  document.getElementById('pwd-input').value = '';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').classList.remove('visible');
+}
+
+// ══ NAVEGACIÓN ══
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+function pickTag(el, group) {
+  document.querySelectorAll('#' + group + ' .tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function getTag(group) {
+  const el = document.querySelector('#' + group + ' .tag.active');
+  return el ? el.textContent.trim() : '';
+}
+
+// ══ CONTEXTO COMPLETO DE VERTEX ACADEMY ══
+const SISTEMA = `Eres el asistente de marketing con IA de Vertex Academy, una academia de nutrición clínica y deportiva en Ecuador fundada en 2025. Conoces el plan de negocio completo y siempre das respuestas específicas, accionables y adaptadas a la realidad de la empresa.
+
+EMPRESA:
+- Nombre: Vertex Academy | Slogan: "Conocimiento en el punto más alto"
+- Web: vertexacademy.ec | IG: @vertexacademy | Email: info@cursosvertex.com
+- Colores: negro (#1a1004) + dorado (#c9a227)
+- Etapa actual: Pre-lanzamiento (Semana 0)
+
+FUNDADORES:
+- Kevin Adrián Clavijo: Fundador & Director Científico (48%). Interno de Nutrición UCSG, ex deportista alto rendimiento, entrenador certificado IFBB, pro-secretario FEUCSG.
+- William Soriano Loy: Fundador & Director Pedagógico (32%). Lic. Pedagogía, Magíster en Educación, interno de Nutrición UCSG.
+
+AVALES INSTITUCIONALES (10% ingresos netos c/u, sin participación societaria):
+- FELP: Federación Ecuatoriana de Levantamiento de Pesas (Performance)
+- FEUCSG: Federación de Estudiantes UCSG (Clinical)
+
+NICHO 1 — VERTEX CLINICAL:
+- Audiencia: estudiantes de nutrición y medicina, 18–28 años, Ecuador y Latinoamérica online
+- Motivación: aprender lo que la U no enseña, certificado válido, precio accesible
+- Cursos: Bioquímica Clínica Aplicada ($20 live/$25 grabado, 4 sesiones 8h), IA en Nutrición ($20, 2 sesiones), Suplementación Deportiva ISSN ($25/$30, 3 sesiones), Interpretación Exámenes Lab ($20/$22, 2 sesiones), Epigenética Nutricional ($20/$25, 2 sesiones), Software Nutricional Easydiet ($15/$18, 1 taller)
+
+NICHO 2 — VERTEX PERFORMANCE:
+- Audiencia: entrenadores y atletas de élite (CrossFit, Halterofilia, Musculación, Running), 22–40 años
+- Motivación: aplicación práctica inmediata, aval FELP e IFBB, diferenciación profesional
+- Cursos: Nutrición Halterofilia ($50–60 presencial+online, aval FELP), Nutrición Musculación/BB ($45–55), Nutrición CrossFit ($35–45), Composición Corporal ISAK ($55–65 presencial, aval FELP), Suplementación A/B-C ($30–40), Nutrición Running ($30–40)
+
+PRECIOS DE LANZAMIENTO (precio fundador):
+- Clinical 2–4h: $15 lanzamiento → $25–30 regular
+- Clinical 6–8h: $20–25 lanzamiento → $35–45 regular
+- Performance online: $25–30 → $40–55
+- Taller presencial: $40–50 → $55–70
+- Cursos grabados Hotmart: 9.9% comisión
+
+PROYECCIÓN FINANCIERA (conservadora):
+Mes 1: $200–400 | Mes 2: $400–700 | Mes 3: $600–1,000 | Mes 4: $800–1,300 | Mes 6: $1,400–2,200
+
+DISTRIBUCIÓN GANANCIAS:
+- Fase 1 (meses 1–3): 70–80% reinversión, 20–30% distribución (Kevin 48%, William 32%)
+- Fase 2 (meses 4–6): 50/50
+- Fase 3 (mes 7+): distribución normalizada según participación
+
+ESTRATEGIA DE REDES SOCIALES:
+- Instagram: 5–6 posts/semana (40% educativo, 25% mito vs evidencia, 15% behind-the-scenes, 10% testimonios, 10% venta directa)
+- TikTok: 4–5 videos/semana, alcance orgánico
+- WhatsApp Business: cierre de ventas y atención al cliente
+- YouTube: desde mes 3, 1 video/semana como embudo
+
+META SEGUIDORES: Mes 1: 200–400 | Mes 3: 800–1,500 | Mes 6: 3,000–6,000
+
+HERRAMIENTAS:
+Hotmart (cursos grabados, gratis+9.9%), Canva ($0/Pro $13), Zoom ($0/$15), PayPal Business, Google Forms, Meta Ads, CapCut, Trello
+
+TONO DE COMUNICACIÓN: Científico pero accesible, evidencia antes que opinión, cercano y auténtico, empoderador para estudiantes ecuatorianos.
+
+REGLAS: Sé siempre específico y accionable. Usa números concretos del plan. Adapta cada respuesta al contexto real de Vertex Academy. Habla en español latinoamericano natural.`;
+
+// ══ LLAMADA AL BACKEND ══
+async function callAPI(prompt, resultId, copyId) {
+  const resultEl = document.getElementById(resultId);
+  const copyEl = copyId ? document.getElementById(copyId) : null;
+
+  resultEl.textContent = 'Generando con IA…';
+  resultEl.className = 'result visible loading';
+  if (copyEl) copyEl.style.display = 'none';
+
+  try {
+    const resp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        password: SESSION_PWD,
+        system: SISTEMA,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (resp.status === 401) {
+      doLogout();
+      return;
+    }
+
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+
+    const text = data.content?.map(b => b.text || '').join('') || 'Sin respuesta.';
+    resultEl.textContent = text;
+    resultEl.className = 'result visible';
+    if (copyEl) copyEl.style.display = 'inline-flex';
+
+  } catch(e) {
+    resultEl.textContent = 'Error: ' + e.message;
+    resultEl.className = 'result visible';
+  }
+}
+
+// ══ GENERADORES ══
+function generar(tipo) {
+  let prompt = '';
+  let rid = 'r-' + tipo;
+  let cid = 'cp-' + tipo;
+
+  if (tipo === 'contenido') {
+    const t = getTag('t-tipo'), tema = getTag('t-tema'), nicho = getTag('t-nicho');
+    const extra = document.getElementById('extra-contenido').value;
+    prompt = `Crea el contenido completo para un post de Instagram de tipo "${t}" para Vertex Academy.
+Tema: ${tema} | Nicho: ${nicho}${extra ? '\nContexto: ' + extra : ''}
+
+Incluye:
+1. Hook de apertura (primeras palabras — máximo 10 palabras)
+2. Contenido completo (slide a slide si es carrusel, o guión completo si es reel con tiempos)
+3. Caption para Instagram (con emojis estratégicos, hashtags Ecuador/nutrición y CTA claro)
+4. Sugerencia breve de diseño en Canva (colores, tipografía, elementos visuales)
+
+Tono: científico pero cercano, auténtico, sin clickbait vacío.`;
+
+  } else if (tipo === 'bio') {
+    rid = 'r-contenido'; cid = 'cp-contenido';
+    prompt = `Escribe 3 versiones de bio para Instagram de @vertexacademy. Cada una máximo 150 caracteres. Incluye: qué es, a quién va dirigida, diferenciador (evidencia + avales FELP/FEUCSG), CTA. Formato: VERSION 1: ... | VERSION 2: ... | VERSION 3: ...`;
+
+  } else if (tipo === 'hooks') {
+    const plat = document.getElementById('h-plat').value;
+    const tema = document.getElementById('h-tema').value;
+    prompt = `Genera 10 hooks de máximo rendimiento para ${plat} de Vertex Academy sobre "${tema}".
+Para cada hook: texto exacto (máx 12 palabras) + tipo de hook + por qué funciona para esta audiencia. Ordénalos de más a menos potente.`;
+
+  } else if (tipo === 'plan') {
+    const etapa = document.getElementById('p-etapa').value;
+    const meta = document.getElementById('p-meta').value;
+    const curso = document.getElementById('p-curso').value;
+    const pub = document.getElementById('p-pub').value;
+    prompt = `Crea un plan de ventas estructurado semana a semana para Vertex Academy.
+Etapa: ${etapa} | Meta 30 días: ${meta} | Curso principal: ${curso} | Publicidad: ${pub}
+
+Incluye: acciones diarias concretas para conseguir inscriptos, estrategia de contenido alineada a ventas, scripts para cerrar por WhatsApp e Instagram DM, qué hacer si no se alcanza la meta a mitad del período, KPIs semanales y cómo usar los avales FELP/FEUCSG como argumento de venta. Sé muy específico con números y días.`;
+
+  } else if (tipo === 'whatsapp') {
+    const sit = document.getElementById('w-sit').value;
+    const curso = document.getElementById('w-curso').value;
+    const tono = document.getElementById('w-tono').value;
+    prompt = `Escribe un script completo de WhatsApp para Vertex Academy.
+Situación: el lead ${sit.toLowerCase()} | Curso: ${curso} | Tono: ${tono}
+
+Incluye: mensaje de apertura, cómo manejar objeciones en esa situación, 2–3 variantes de respuesta según reacción del lead, mensaje de cierre con CTA y link de pago. Que sea natural y conversacional, no robótico.`;
+
+  } else if (tipo === 'calendario') {
+    const periodo = document.getElementById('c-periodo').value;
+    const frec = document.getElementById('c-frec').value;
+    const obj = getTag('t-obj');
+    prompt = `Crea el calendario editorial de Instagram para Vertex Academy.
+Período: ${periodo} | Frecuencia: ${frec} | Objetivo: ${obj}
+
+Para cada post incluye: día y hora sugerida, formato (reel/carrusel/story/estático), tema específico y ángulo, hook de apertura, CTA concreto. Distribuye según fórmula Vertex: 40% educativo, 25% mito vs evidencia, 15% behind the scenes, 10% testimonios, 10% venta directa.`;
+
+  } else if (tipo === 'metricas') {
+    rid = 'r-metricas'; cid = null;
+    const seg = document.getElementById('m-seg').textContent;
+    const ins = document.getElementById('m-ins').textContent;
+    const ing = document.getElementById('m-ing').textContent;
+    const sem = document.getElementById('i-sem').value;
+    prompt = `Analiza las métricas actuales de Vertex Academy y dame recomendaciones específicas.
+Período: ${sem} | Seguidores IG: ${seg} (meta: 200–400) | Inscriptos: ${ins} (meta: 15–20) | Ingresos: ${ing} (meta: $200–400)
+
+Dime: 1) cómo vamos vs metas (sé honesto), 2) el cuello de botella principal, 3) exactamente 3 acciones concretas para hacer ESTA semana, 4) qué está funcionando y debemos potenciar.`;
+  }
+
+  callAPI(prompt, rid, cid);
+}
+
+// ══ CHAT ══
+const history = [];
+
+async function enviar() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  addMsg(msg, 'user');
+  history.push({ role: 'user', content: msg });
+  await responder();
+}
+
+function pregunta(msg) {
+  document.getElementById('chat-input').value = msg;
+  enviar();
+}
+
+function addMsg(texto, tipo) {
+  const area = document.getElementById('chat-area');
+  const div = document.createElement('div');
+  div.className = 'msg ' + tipo;
+  div.textContent = texto;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+  return div;
+}
+
+async function responder() {
+  const loading = addMsg('…', 'ai');
+  loading.style.opacity = '0.5';
+  try {
+    const resp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        password: SESSION_PWD,
+        system: SISTEMA + '\n\nResponde de forma conversacional y directa. Máximo 200 palabras a menos que el usuario pida algo extenso.',
+        messages: history
+      })
+    });
+    if (resp.status === 401) { doLogout(); return; }
+    const data = await resp.json();
+    const text = data.content?.map(b => b.text || '').join('') || 'Error.';
+    loading.textContent = text;
+    loading.style.opacity = '1';
+    history.push({ role: 'assistant', content: text });
+  } catch(e) {
+    loading.textContent = 'Error de conexión.';
+    loading.style.opacity = '1';
+  }
+  document.getElementById('chat-area').scrollTop = 9999;
+}
+
+// ══ MÉTRICAS ══
+function actualizarMetricas() {
+  const seg = parseInt(document.getElementById('i-seg').value) || 0;
+  const ins = parseInt(document.getElementById('i-ins').value) || 0;
+  const ing = parseFloat(document.getElementById('i-ing').value) || 0;
+
+  document.getElementById('m-seg').textContent = seg;
+  document.getElementById('m-ins').textContent = ins;
+  document.getElementById('m-ing').textContent = '$' + Math.round(ing);
+
+  const pSeg = Math.min(100, Math.round(seg / 300 * 100));
+  const pIns = Math.min(100, Math.round(ins / 17 * 100));
+  const pIng = Math.min(100, Math.round(ing / 300 * 100));
+
+  document.getElementById('bar-seg').style.width = pSeg + '%';
+  document.getElementById('bar-ins').style.width = pIns + '%';
+  document.getElementById('bar-ing').style.width = pIng + '%';
+  document.getElementById('pct-seg').textContent = pSeg + '%';
+  document.getElementById('pct-ins').textContent = pIns + '%';
+  document.getElementById('pct-ing').textContent = pIng + '%';
+}
+
+// ══ COPIAR ══
+function copiar(rid, cid) {
+  const text = document.getElementById(rid).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById(cid);
+    btn.textContent = '¡Copiado!';
+    setTimeout(() => btn.textContent = 'Copiar', 2000);
+  });
+}
+
+// ══ ADS TOOLKIT ══
+function calcMetrics() {
+  const ins = parseFloat(document.getElementById('calc-inscritos').value) || 0;
+  const ticket = parseFloat(document.getElementById('calc-ticket').value) || 0;
+  const dias = parseFloat(document.getElementById('calc-dias').value) || 1;
+  const plat = document.getElementById('calc-plat').value;
+  if (!ins || !ticket || !dias) { document.getElementById('calc-metrics-row').style.display = 'none'; return; }
+  const cpl = plat.includes('TikTok') ? 18 : plat.includes('Google') ? 22 : 20;
+  const inv = Math.round(ins * cpl * 1.3);
+  const dia = Math.round(inv / dias);
+  const roas = (ins * ticket / inv).toFixed(1);
+  document.getElementById('cm-inv').textContent = '$' + inv.toLocaleString();
+  document.getElementById('cm-dia').textContent = '$' + dia;
+  document.getElementById('cm-roas').textContent = roas + 'x';
+  document.getElementById('calc-metrics-row').style.display = 'block';
+}
+
+async function genAds(tipo) {
+  let prompt = '';
+  const rid = 'r-' + tipo;
+
+  if (tipo === 'calculadora') {
+    const ins = document.getElementById('calc-inscritos').value || '30';
+    const ticket = document.getElementById('calc-ticket').value || '297';
+    const dias = document.getElementById('calc-dias').value || '21';
+    const plat = document.getElementById('calc-plat').value;
+    prompt = `Eres un experto en publicidad digital para academias y cursos online en Latinoamérica.
+
+Un cliente quiere conseguir ${ins} inscritos a su curso de $${ticket} USD en ${dias} días usando ${plat}.
+
+Responde en español con esta estructura (sin asteriscos, sin markdown, sin emojis):
+
+INVERSIÓN RECOMENDADA
+[Monto total y desglose: captación, retargeting, cierre]
+
+DISTRIBUCIÓN POR SEMANA
+[Cómo distribuir el presupuesto semana a semana]
+
+MÉTRICAS CLAVE A VIGILAR
+[3 métricas con valores objetivo]
+
+ESTRATEGIA RÁPIDA
+[3 acciones concretas para maximizar resultados]
+
+Usa benchmarks reales del mercado latinoamericano.`;
+
+  } else if (tipo === 'segmentacion') {
+    const datos = document.getElementById('seg-datos').value;
+    const obj = document.getElementById('seg-obj').value;
+    const presup = document.getElementById('seg-presup').value || '500';
+    if (!datos.trim()) { alert('Pega tus métricas de campaña primero.'); return; }
+    prompt = `Eres un experto en Meta Ads para academias y cursos online en Latinoamérica.
+
+Objetivo: ${obj}
+Presupuesto restante: $${presup} USD
+Métricas actuales:
+${datos}
+
+Analiza y responde en español (sin asteriscos, sin markdown):
+
+GANADOR CLARO
+[Qué segmento funciona mejor y por qué]
+
+SEGMENTO A PAUSAR
+[Cuál está desperdiciando presupuesto y por qué]
+
+DÓNDE PONER EL PRESUPUESTO RESTANTE
+[Distribución concreta con montos]
+
+AJUSTES INMEDIATOS
+[3 cambios específicos para hacer hoy en Ads Manager]
+
+PROYECCIÓN
+[Qué resultado esperar con los $${presup} restantes si aplicas estos cambios]`;
+
+  } else if (tipo === 'audiencias') {
+    const quien = document.getElementById('aud-quien').value;
+    const pais = document.getElementById('aud-pais').value;
+    const tipo2 = document.getElementById('aud-tipo').value;
+    const presup = document.getElementById('aud-presup').value || '200';
+    if (!quien.trim()) { alert('Describe a tu cliente ideal primero.'); return; }
+    prompt = `Eres un experto en Meta Ads para academias y cursos online en ${pais}.
+
+Cliente ideal: ${quien}
+Presupuesto de prueba: $${presup} USD
+Tipo de audiencia: ${tipo2}
+
+Genera exactamente 5 audiencias listas para crear en Meta Ads Manager.
+Responde en español con este formato por cada una (sin asteriscos, sin markdown):
+
+AUDIENCIA 1 — [nombre descriptivo]
+Intereses: [lista exacta como aparecen en Meta Ads]
+Edad: [rango]
+Género: [si aplica]
+Comportamientos: [si aplica]
+Presupuesto sugerido: $[monto] de $${presup}
+Por qué funciona: [1 línea]
+
+[Repite para las 5 audiencias]
+
+ORDEN DE PRUEBA: [cuál lanzar primero y por qué]`;
+  }
+
+  await callAPI(prompt, rid, null);
+}
+</script>
+</body>
+</html>
