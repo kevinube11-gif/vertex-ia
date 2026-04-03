@@ -1,0 +1,157 @@
+{
+  "name": "VERTEX OS - Meta Ads Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "webhook-vertex-meta",
+        "responseCode": 200,
+        "responseData": "success"
+      },
+      "name": "Webhook (Recibe campañas)",
+      "type": "n8n-nodes-base.webhook",
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "campaigns",
+        "columns": "nombre,presupuesto,canal,status,fecha_inicio",
+        "fieldsUi": {
+          "fields": [
+            {
+              "fieldName": "nombre",
+              "fieldValue": "={{ $node[\"Webhook (Recibe campañas)\"].json.body.campaign_name }}"
+            },
+            {
+              "fieldName": "presupuesto",
+              "fieldValue": "={{ $node[\"Webhook (Recibe campañas)\"].json.body.budget }}"
+            },
+            {
+              "fieldName": "canal",
+              "fieldValue": "meta"
+            },
+            {
+              "fieldName": "status",
+              "fieldValue": "borrador"
+            }
+          ]
+        }
+      },
+      "name": "Guardar en BD",
+      "type": "n8n-nodes-base.supabase",
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.N8N_WEBHOOK_URL }}",
+        "requestMethod": "POST",
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "campaign_id",
+              "value": "={{ $node[\"Guardar en BD\"].json.data[0].id }}"
+            },
+            {
+              "name": "action",
+              "value": "create_meta_ads"
+            }
+          ]
+        }
+      },
+      "name": "Enviar a VERTEX OS",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://graph.instagram.com/v18.0/{{ $env.META_PAGE_ID }}/adsets",
+        "method": "POST",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $node[\"Webhook (Recibe campañas)\"].json.body.campaign_name }}-adset"
+            },
+            {
+              "name": "campaign_id",
+              "value": "={{ $env.META_CAMPAIGN_ID }}"
+            },
+            {
+              "name": "daily_budget",
+              "value": "={{ Math.round($node[\"Webhook (Recibe campañas)\"].json.body.budget * 100) }}"
+            },
+            {
+              "name": "billing_event",
+              "value": "IMPRESSIONS"
+            },
+            {
+              "name": "optimization_goal",
+              "value": "LINK_CLICKS"
+            },
+            {
+              "name": "access_token",
+              "value": "={{ $env.META_BUSINESS_ACCOUNT_TOKEN }}"
+            }
+          ]
+        }
+      },
+      "name": "Crear AdSet en Meta",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "message": "✅ Campaña creada exitosamente\n\nNombre: {{ $node[\"Webhook (Recibe campañas)\"].json.body.campaign_name }}\nPresupuesto: ${{ $node[\"Webhook (Recibe campañas)\"].json.body.budget }}\nAdSet ID: {{ $node[\"Crear AdSet en Meta\"].json.body.id }}"
+      },
+      "name": "Slack Notification",
+      "type": "n8n-nodes-base.slack",
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Webhook (Recibe campañas)": {
+      "main": [
+        [
+          {
+            "node": "Guardar en BD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar en BD": {
+      "main": [
+        [
+          {
+            "node": "Enviar a VERTEX OS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar a VERTEX OS": {
+      "main": [
+        [
+          {
+            "node": "Crear AdSet en Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear AdSet en Meta": {
+      "main": [
+        [
+          {
+            "node": "Slack Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
